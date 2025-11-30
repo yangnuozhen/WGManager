@@ -1,0 +1,5 @@
+﻿@PortManager_HostAddress = https://localhost:7194
+
+GET {{PortManager_HostAddress}}/api/port
+
+###
