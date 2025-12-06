@@ -1,3 +1,4 @@
 <Solution>
-  <Project Path="WGManager/PortManager.Hub.csproj" />
+  <Project Path="PortManager.Client.CLI/PortManager.Client.CLI.csproj" Id="a3267285-34d9-478d-8a97-98d7e6484c93" />
+  <Project Path="PortManager.Hub/PortManager.Hub.csproj" />
 </Solution>
