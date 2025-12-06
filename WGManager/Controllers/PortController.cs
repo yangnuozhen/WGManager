@@ -16,6 +16,6 @@ namespace PortManager.Controllers
         [HttpGet()]
         public IActionResult GetPort()
             => Ok(_portService.Port);
-        
+
     }
 }

@@ -7,8 +7,12 @@ namespace PortManager
     public class PortService : BackgroundService, IPortService
     {
         private readonly ILogger<PortService> _logger;
+        // 配置名称 & 路径
         private readonly string confName;
         private readonly string configPath;
+        // 端口范围
+        private readonly int minPort;
+        private readonly int maxPort;
         public ushort Port
         {
             get => ReadPort();
@@ -20,16 +24,37 @@ namespace PortManager
         public PortService(ILogger<PortService> logger, IConfiguration configuration)
         {
             _logger = logger;
-            confName = configuration.GetValue<string>("WireGuard:ConfigName") ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(confName)) 
+            confName = configuration["WireGuard:ConfigName"] ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(confName))
             {
                 throw new Exception("WireGuard 配置名称未设置，无法初始化 PortService。");
             }
+            // TODO: 支持自定义路径
             configPath = $"/etc/wireguard/{confName}.conf";
             if (!File.Exists(configPath))
             {
                 throw new FileNotFoundException($"WireGuard 配置文件未找到: {configPath}");
             }
+            string? minPortStr = configuration["WireGuard:MinPort"];
+            string? maxPortStr = configuration["WireGuard:MaxPort"];
+            if (string.IsNullOrWhiteSpace(minPortStr) || string.IsNullOrWhiteSpace(maxPortStr))
+            {
+                _logger.LogWarning("未配置 MinPort 或 MaxPort，使用默认范围 40000-50000。");
+                minPort = 40000;
+                maxPort = 50000;
+            }
+            else
+            {
+                if (!int.TryParse(minPortStr, out minPort) || !int.TryParse(maxPortStr, out maxPort)
+                    || minPort < 1 || maxPort > 65535 || minPort >= maxPort)
+                {
+                    _logger.LogWarning("MinPort 和 MaxPort 配置无效，必须为 1-65535 之间的数字，且 MinPort 小于 MaxPort。\n" +
+                        "将使用默认范围 40000-50000。");
+                    minPort = 40000;
+                    maxPort = 50000;
+                }
+            }
+            _logger.LogInformation($"使用的端口范围: {minPort}-{maxPort}, 请记得在防火墙 & 云服务提供商安全组中放行UDP端口范围。");
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -55,12 +80,13 @@ namespace PortManager
             ushort newPort;
             do
             {
-                newPort = (ushort)random.Next(40000, 65536);
+                newPort = (ushort)random.Next(minPort, maxPort);
             } while (newPort == Port || IsPortInUse(newPort)); // 确保新端口不同于当前端口
             Port = newPort;
             return Port;
         }
 
+        // ChatGPT 想到的，太天才
         public static bool IsPortInUse(ushort port)
         {
             try
@@ -119,16 +145,15 @@ namespace PortManager
             // 回写文件
             File.WriteAllLines(configPath, lines);
 
-            // 可选：立刻让 WireGuard 应用变更（根据需要开启）
+            // 重载 wg-quick systemctl 服务
             ReloadWireGuard();
         }
 
         /// <summary>
-        /// 重启 wg-quick 服务使改动立即生效（可选）。
+        /// 重启 wg-quick 服务使改动立即生效。
         /// </summary>
         private void ReloadWireGuard()
         {
-            // 严格要求 root 权限，Ubuntu 24.04 可正常运行
             var process = new System.Diagnostics.Process
             {
                 StartInfo = new System.Diagnostics.ProcessStartInfo
