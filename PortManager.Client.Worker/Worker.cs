@@ -65,9 +65,9 @@ public class Worker : BackgroundService
 
     private void ApplyWireGuardConfig()
     {
-        _logger.LogInformation("即将重载 WireGuard 配置...");
+        _logger.LogInformation("即将重载 WireGuard 配置{itf}...", _opts.InterfaceName);
 
-        LinuxShell.Run("systemctl", "reload wg-quick@wg0");
+        LinuxShell.Run("systemctl", $"reload wg-quick@{_opts.InterfaceName}");
 
         _logger.LogInformation("已重载 WireGuard 配置。");
     }

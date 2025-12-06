@@ -19,6 +19,12 @@ Option<int> intervalOpt = new("--interval", "-i")
     DefaultValueFactory = parseResult => 10
 };
 
+Option<string> interfaceOpt = new("--interface", "-n")
+{
+    Description = "指定 WireGuard 隧道接口名称，默认为 wg0。",
+    DefaultValueFactory = parseResult => "wg0"
+};
+
 RootCommand rootCommand = new("WGManager Client Port Manager");
 rootCommand.Options.Add(configPathOpt);
 rootCommand.Options.Add(hubEndpointOpt);
