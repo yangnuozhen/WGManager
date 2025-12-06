@@ -67,7 +67,7 @@ public class Worker : BackgroundService
     {
         _logger.LogInformation("即将重载 WireGuard 配置...");
 
-        LinuxShell.Run("bash", "-c \"wg syncconf wgx <(wg-quick strip wgx)\"");
+        LinuxShell.Run("systemctl", "reload wg-quick@wg0");
 
         _logger.LogInformation("已重载 WireGuard 配置。");
     }

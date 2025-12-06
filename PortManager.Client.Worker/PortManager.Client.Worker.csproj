@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>dotnet-PortManager.Client.Worker-86d9d58b-7036-4c3a-96bc-11cb682c1a22</UserSecretsId>
-    <Version>1.0.0.0</Version>
+    <Version>1.0.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
