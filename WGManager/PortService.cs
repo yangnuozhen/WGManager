@@ -63,7 +63,6 @@ namespace PortManager
                 try
                 {
                     ushort newPort = RefreshPort();
-                    _logger.LogInformation($"[{DateTime.Now}] 已更新 WireGuard 监听端口为: {newPort}");
                 }
                 catch (Exception ex)
                 {
@@ -145,6 +144,9 @@ namespace PortManager
             // 回写文件
             File.WriteAllLines(configPath, lines);
 
+                    
+            _logger.LogInformation($"[{DateTime.Now}]WireGuard 监听端口已更新为 {newPort}。即将重启服务...");
+
             // 重载 wg-quick systemctl 服务
             ReloadWireGuard();
         }
@@ -172,7 +174,9 @@ namespace PortManager
             process.WaitForExit();
 
             if (!string.IsNullOrWhiteSpace(error))
-                Console.WriteLine("WireGuard 重启错误: " + error);
+                _logger.LogError("WireGuard 重启错误: " + error);
+            else
+                _logger.LogInformation($"[{DateTime.Now}]WireGuard 重启成功: " + output);
         }
     }
 }
