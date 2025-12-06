@@ -1,4 +1,4 @@
 <Solution>
-  <Project Path="PortManager.Client.CLI/PortManager.Client.CLI.csproj" Id="a3267285-34d9-478d-8a97-98d7e6484c93" />
+  <Project Path="PortManager.Client.Worker/PortManager.Client.Worker.csproj" Id="421884dd-eaae-495d-a47a-786da77d963f" />
   <Project Path="PortManager.Hub/PortManager.Hub.csproj" />
 </Solution>
